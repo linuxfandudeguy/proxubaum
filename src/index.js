@@ -60,8 +60,6 @@ var unblocker = new Unblocker({
   hpkp: true,
   csp: true,
   redirects: true,
-  decompress: true,
-  charsets: true,
   urlPrefixer: true,
   metaRobots: true,
   contentLength: true
