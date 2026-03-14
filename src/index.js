@@ -1,11 +1,12 @@
 var express = require("express")
 var Unblocker = require("unblocker")
+var serverless = require("serverless-http")
 
 var app = express()
 
 var PREFIX = "/proxy/"
 
-/* script that will be injected into proxied pages */
+/* script injected into proxied pages */
 var proxyPatch = `
 <script>
 (function(){
@@ -54,7 +55,6 @@ window.fetch=function(input,init){
 
 var unblocker = new Unblocker({
   prefix: PREFIX,
-
   cookies: true,
   hsts: true,
   hpkp: true,
@@ -88,7 +88,7 @@ function normalizeUrl(url) {
 
 }
 
-app.get("/", function(req, res) {
+app.get("/", function(req,res){
 
   res.send(`
   <html>
@@ -106,34 +106,30 @@ app.get("/", function(req, res) {
 
 })
 
-app.get("/go", function(req, res) {
+app.get("/go", function(req,res){
 
-  var url = req.query.url
+  var url=req.query.url
+  if(!url) return res.send("missing url")
 
-  if (!url) return res.send("missing url")
+  url=normalizeUrl(url)
+  if(!url) return res.send("invalid url")
 
-  url = normalizeUrl(url)
+  var encoded=encodeURIComponent(url)
 
-  if (!url) return res.send("invalid url")
-
-  var encoded = encodeURIComponent(url)
-
-  res.redirect(PREFIX + encoded)
+  res.redirect(PREFIX+encoded)
 
 })
 
-/* decode proxy path */
-app.use(PREFIX, function(req, res, next) {
+app.use(PREFIX,function(req,res,next){
 
-  try {
-    req.url = decodeURIComponent(req.url)
-  } catch (e) {}
+  try{
+    req.url=decodeURIComponent(req.url)
+  }catch(e){}
 
   next()
 
 })
 
-/* inject script into proxied HTML */
 app.use(function(req,res,next){
 
   var send=res.send
@@ -153,10 +149,5 @@ app.use(function(req,res,next){
 
 app.use(unblocker)
 
-var port = process.env.PORT || 3000
-
-app.listen(port,"0.0.0.0",function(){
-
-  console.log("Proxubaum running on port "+port)
-
-})
+/* SERVERLESS EXPORT */
+exports.handler = serverless(app)
