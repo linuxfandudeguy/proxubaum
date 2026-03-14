@@ -5,53 +5,42 @@ const serverless = require("serverless-http")
 const app = express()
 const PREFIX = "/proxy/"
 
-// Minimal Unblocker setup optimized for site compatibility
+// Unblocker configuration
 const unblocker = new Unblocker({
   prefix: PREFIX,
-  cookies: true,       // preserve cookies
-  redirects: true,     // handle 3xx redirects
-  decompress: true,    // decompress gzip/deflate HTML
-  urlPrefixer: true,   // rewrite all asset URLs through /proxy/
-  charsets: false,     
-  hsts: true,          
-  hpkp: true,         
-  csp: true,         
+  cookies: true,
+  redirects: true,
+  decompress: true,
+  urlPrefixer: true,
+  charsets: true,
+  csp: false // prevent script/style blocking
 })
 
-// Simple homepage
+// Homepage with instructions
 app.get("/", (req,res)=>{
   res.send(`
   <html>
     <head><title>Proxy</title></head>
     <body>
       <h1>Proxy</h1>
-      <form action="/go">
-        <input name="url" placeholder="https://example.com">
-        <button>Go</button>
-      </form>
+      <p>To visit a site, append it to /proxy/. For example:</p>
+      <ul>
+        <li><a href="/proxy/https://example.com">/proxy/https://example.com</a></li>
+      </ul>
     </body>
   </html>
   `)
 })
 
-// Normalize user input
-function normalizeUrl(url){
-  if(!url.startsWith("http://") && !url.startsWith("https://")){
-    url = "https://" + url
+// Optional: normalize URLs before passing to Unblocker
+app.use(PREFIX, (req,res,next)=>{
+  if(!req.url.startsWith("http://") && !req.url.startsWith("https://")){
+    req.url = "https://" + req.url
   }
-  return url
-}
-
-// Redirect /go to proxied URL
-app.get("/go", (req,res)=>{
-  let url = req.query.url
-  if(!url) return res.send("Missing url")
-
-  url = normalizeUrl(url)
-  res.redirect(PREFIX + url) // do NOT encode
+  next()
 })
 
-// Let Unblocker handle all proxied requests
+// Let Unblocker handle everything
 app.use(unblocker)
 
 // Export serverless handler
