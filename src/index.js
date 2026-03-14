@@ -1,6 +1,5 @@
 const express = require("express")
 const Unblocker = require("unblocker")
-const serverless = require("serverless-http")
 
 const app = express()
 
