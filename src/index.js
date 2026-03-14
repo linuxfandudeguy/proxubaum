@@ -5,7 +5,7 @@ const serverless = require("serverless-http")
 const app = express()
 const PREFIX = "/proxy/"
 
-// Unblocker configuration
+// Unblocker config optimized for modern sites
 const unblocker = new Unblocker({
   prefix: PREFIX,
   cookies: true,
@@ -13,35 +13,44 @@ const unblocker = new Unblocker({
   decompress: true,
   urlPrefixer: true,
   charsets: true,
-  csp: false // prevent script/style blocking
+  csp: false,   // disable CSP to avoid breaking scripts/styles
 })
 
-// Homepage with instructions
+// Optional homepage (can be removed if you want only /proxy)
 app.get("/", (req,res)=>{
   res.send(`
   <html>
     <head><title>Proxy</title></head>
     <body>
       <h1>Proxy</h1>
-      <p>To visit a site, append it to /proxy/. For example:</p>
-      <ul>
-        <li><a href="/proxy/https://example.com">/proxy/https://example.com</a></li>
-      </ul>
+      <p>Use <code>/proxy/https://example.com</code> directly in the URL.</p>
     </body>
   </html>
   `)
 })
 
-// Optional: normalize URLs before passing to Unblocker
+// Normalize URL if needed (optional)
+function normalizeUrl(url){
+  if(!url.startsWith("http://") && !url.startsWith("https://")){
+    url = "https://" + url
+  }
+  return url
+}
+
+// Middleware to allow visiting /proxy/<url> directly
 app.use(PREFIX, (req,res,next)=>{
-  if(!req.url.startsWith("http://") && !req.url.startsWith("https://")){
-    req.url = "https://" + req.url
+  // req.url includes the slash at the start
+  // e.g., "/https://example.com/path"
+  const target = req.url.slice(1) // remove leading slash
+  if(target){
+    // Optional normalization
+    req.url = normalizeUrl(target)
   }
   next()
 })
 
-// Let Unblocker handle everything
+// Let Unblocker handle everything under /proxy
 app.use(unblocker)
 
-// Export serverless handler
+// Export Netlify serverless handler
 module.exports.handler = serverless(app)
