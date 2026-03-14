@@ -1,12 +1,12 @@
-const express = require("express")
-const Unblocker = require("unblocker")
+var express = require("express")
+var Unblocker = require("unblocker")
 
-const app = express()
+var app = express()
 
-const PREFIX = "/proxy/"
+var PREFIX = "/proxy/"
 
-/* script injected into proxied pages */
-const proxyPatch = `
+/* script that will be injected into proxied pages */
+var proxyPatch = `
 <script>
 (function(){
 
@@ -52,8 +52,9 @@ window.fetch=function(input,init){
 </script>
 `
 
-const unblocker = new Unblocker({
+var unblocker = new Unblocker({
   prefix: PREFIX,
+
   cookies: true,
   hsts: true,
   hpkp: true,
@@ -66,29 +67,28 @@ const unblocker = new Unblocker({
   contentLength: true
 })
 
-function normalizeUrl(url){
+function normalizeUrl(url) {
 
-  if(!url.startsWith("http")){
-    url="https://"+url
+  if (!url.startsWith("http")) {
+    url = "https://" + url
   }
 
-  try{
-    const u=new URL(url)
+  try {
+    var u = new URL(url)
 
-    if(u.pathname===""){
-      u.pathname="/"
+    if (u.pathname === "") {
+      u.pathname = "/"
     }
 
     return u.toString()
 
-  }catch(e){
+  } catch (e) {
     return null
   }
 
 }
 
-/* homepage */
-app.get("/",function(req,res){
+app.get("/", function(req, res) {
 
   res.send(`
   <html>
@@ -106,38 +106,37 @@ app.get("/",function(req,res){
 
 })
 
-/* redirect to encoded proxy */
-app.get("/go",function(req,res){
+app.get("/go", function(req, res) {
 
-  let url=req.query.url
+  var url = req.query.url
 
-  if(!url) return res.send("missing url")
+  if (!url) return res.send("missing url")
 
-  url=normalizeUrl(url)
+  url = normalizeUrl(url)
 
-  if(!url) return res.send("invalid url")
+  if (!url) return res.send("invalid url")
 
-  const encoded=encodeURIComponent(url)
+  var encoded = encodeURIComponent(url)
 
-  res.redirect(PREFIX+encoded)
+  res.redirect(PREFIX + encoded)
 
 })
 
 /* decode proxy path */
-app.use(PREFIX,function(req,res,next){
+app.use(PREFIX, function(req, res, next) {
 
-  try{
-    req.url=decodeURIComponent(req.url)
-  }catch(e){}
+  try {
+    req.url = decodeURIComponent(req.url)
+  } catch (e) {}
 
   next()
 
 })
 
-/* inject script into proxied html */
+/* inject script into proxied HTML */
 app.use(function(req,res,next){
 
-  const send=res.send
+  var send=res.send
 
   res.send=function(body){
 
@@ -152,12 +151,12 @@ app.use(function(req,res,next){
 
 })
 
-/* run unblocker */
 app.use(unblocker)
 
-/* convert express to netlify handler */
-const handler = serverless(app)
+var port = process.env.PORT || 3000
 
-exports.handler = async (event, context) => {
-  return handler(event, context)
-}
+app.listen(port,"0.0.0.0",function(){
+
+  console.log("Proxubaum running on port "+port)
+
+})
