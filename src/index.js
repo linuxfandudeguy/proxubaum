@@ -1,56 +1,78 @@
+// api/index.js
 const express = require("express")
 const Unblocker = require("unblocker")
 const serverless = require("serverless-http")
 
 const app = express()
+
 const PREFIX = "/proxy/"
 
-// Unblocker config optimized for modern sites
+function normalizeUrl(url){
+  if(!url.startsWith("http")) url = "https://" + url
+
+  try{
+    const u = new URL(url)
+    if(u.pathname === "") u.pathname = "/"
+    return u.toString()
+  }catch{
+    return null
+  }
+}
+
 const unblocker = new Unblocker({
   prefix: PREFIX,
   cookies: true,
+  hsts: true,
+  hpkp: true,
+  csp: true,
   redirects: true,
   decompress: true,
-  urlPrefixer: true,
   charsets: true,
-  csp: false,   // disable CSP to avoid breaking scripts/styles
+  urlPrefixer: true,
+  metaRobots: true,
+  contentLength: true
 })
 
-// Optional homepage (can be removed if you want only /proxy)
 app.get("/", (req,res)=>{
   res.send(`
   <html>
-    <head><title>Proxy</title></head>
-    <body>
-      <h1>Proxy</h1>
-      <p>Use <code>/proxy/https://example.com</code> directly in the URL.</p>
-    </body>
+  <head><title>Proxubaum</title></head>
+  <body>
+  <h1>Proxubaum</h1>
+  <form action="/go">
+    <input name="url" placeholder="example.com">
+    <button>Go</button>
+  </form>
+  </body>
   </html>
   `)
 })
 
-// Normalize URL if needed (optional)
-function normalizeUrl(url){
-  if(!url.startsWith("http://") && !url.startsWith("https://")){
-    url = "https://" + url
-  }
-  return url
-}
+app.get("/go",(req,res)=>{
+  let url = req.query.url
+  if(!url) return res.send("Missing url")
 
-// Middleware to allow visiting /proxy/<url> directly
-app.use(PREFIX, (req,res,next)=>{
-  // req.url includes the slash at the start
-  // e.g., "/https://example.com/path"
-  const target = req.url.slice(1) // remove leading slash
-  if(target){
-    // Optional normalization
-    req.url = normalizeUrl(target)
+  url = normalizeUrl(url)
+  if(!url) return res.send("Invalid url")
+
+  const encoded = encodeURIComponent(url)
+
+  res.redirect(PREFIX + encoded)
+})
+
+app.use(PREFIX,(req,res,next)=>{
+  const parts = req.url.split("/")
+
+  if(parts.length > 1){
+    try{
+      parts[1] = decodeURIComponent(parts[1])
+      req.url = parts.join("/")
+    }catch{}
   }
+
   next()
 })
 
-// Let Unblocker handle everything under /proxy
 app.use(unblocker)
 
-// Export Netlify serverless handler
 module.exports.handler = serverless(app)
