@@ -7,3 +7,5 @@ a very bad proxy powered by `unblocker`
 ## endpoints
 
 `/proxy/::` proxy endpoint
+
+> some websites will be malformed and therefore broken, i still dont know for sure why this happens
