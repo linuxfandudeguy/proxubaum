@@ -1,4 +1,3 @@
-// api/index.js
 const express = require("express")
 const Unblocker = require("unblocker")
 const serverless = require("serverless-http")
@@ -12,7 +11,7 @@ function normalizeUrl(url){
 
   try{
     const u = new URL(url)
-    if(u.pathname === "") u.pathname = "/"
+    if(!u.pathname) u.pathname = "/"
     return u.toString()
   }catch{
     return null
@@ -21,33 +20,43 @@ function normalizeUrl(url){
 
 const unblocker = new Unblocker({
   prefix: PREFIX,
+
   cookies: true,
   hsts: true,
   hpkp: true,
   csp: true,
   redirects: true,
-  decompress: true,
+
+  decompress: false, // important for binary
+
   charsets: true,
   urlPrefixer: true,
   metaRobots: true,
   contentLength: true
 })
 
+/* homepage */
 app.get("/", (req,res)=>{
   res.send(`
   <html>
-  <head><title>Proxubaum</title></head>
+  <head>
+  <title>Proxubaum</title>
+  </head>
+
   <body>
   <h1>Proxubaum</h1>
+
   <form action="/go">
-    <input name="url" placeholder="example.com">
-    <button>Go</button>
+  <input name="url" placeholder="example.com">
+  <button>Go</button>
   </form>
+
   </body>
   </html>
   `)
 })
 
+/* redirect helper */
 app.get("/go",(req,res)=>{
   let url = req.query.url
   if(!url) return res.send("Missing url")
@@ -60,19 +69,41 @@ app.get("/go",(req,res)=>{
   res.redirect(PREFIX + encoded)
 })
 
+/* decode /proxy/<url> */
 app.use(PREFIX,(req,res,next)=>{
-  const parts = req.url.split("/")
 
-  if(parts.length > 1){
-    try{
-      parts[1] = decodeURIComponent(parts[1])
-      req.url = parts.join("/")
-    }catch{}
-  }
+  const raw = req.url.slice(1) // remove leading /
+
+  try{
+    const decoded = decodeURIComponent(raw)
+    req.url = "/" + decoded
+  }catch{}
 
   next()
 })
 
+/* small header fix for binary */
+app.use((req,res,next)=>{
+  res.setHeader("Accept-Ranges","bytes")
+  next()
+})
+
+/* proxy */
 app.use(unblocker)
 
-module.exports.handler = serverless(app)
+/* serverless export with binary support */
+module.exports.handler = serverless(app,{
+  binary:[
+    "image/*",
+    "font/*",
+    "video/*",
+    "audio/*",
+    "application/octet-stream",
+    "application/pdf",
+    "application/zip",
+    "application/x-font-ttf",
+    "application/x-font-woff",
+    "application/x-font-woff2",
+    "application/vnd.ms-fontobject"
+  ]
+})
