@@ -1,9 +1,13 @@
 const express = require("express")
 const Unblocker = require("unblocker")
 const serverless = require("serverless-http")
+const path = require("path")
 
 const app = express()
 const PREFIX = "/proxy/"
+
+/* serve clientside folder */
+app.use(express.static(path.join(__dirname, "../clientside")))
 
 function normalizeUrl(url){
   if(!url.startsWith("http")) url = "https://" + url
@@ -16,48 +20,35 @@ function normalizeUrl(url){
   }
 }
 
-/* homepage */
-app.get("/", (req,res)=>{
-  res.send(`
-  <html>
-  <head><title>Proxubaum</title></head>
-  <body>
-    <h1>Proxubaum</h1>
-    <form action="/go">
-      <input name="url" placeholder="example.com">
-      <button>Go</button>
-    </form>
-  </body>
-  </html>
-  `)
-})
-
-/* redirect to clean /proxy/<encoded-url> */
+/* redirect form -> proxy */
 app.get("/go",(req,res)=>{
   let url = req.query.url
   if(!url) return res.send("Missing url")
+
   url = normalizeUrl(url)
   if(!url) return res.send("Invalid url")
+
   res.redirect(PREFIX + encodeURIComponent(url))
 })
 
-/* decode /proxy/<encoded-url> directly */
-app.use(PREFIX, (req,res,next)=>{
-  // remove prefix and decode the rest
-  const encoded = req.url.slice(1) // remove leading /
+/* decode /proxy/<encoded-url> */
+app.use(PREFIX,(req,res,next)=>{
+  const encoded = req.url.slice(1)
+
   try{
     req.url = "/" + decodeURIComponent(encoded)
   }catch{}
+
   next()
 })
 
-/* small header fix for binary files */
+/* binary fix */
 app.use((req,res,next)=>{
   res.setHeader("Accept-Ranges","bytes")
   next()
 })
 
-/* actual proxy */
+/* proxy */
 const unblocker = new Unblocker({
   prefix: PREFIX,
   cookies: true,
@@ -65,16 +56,17 @@ const unblocker = new Unblocker({
   hpkp: true,
   csp: true,
   redirects: true,
-  decompress: false, // important for binary
+  decompress: false,
   charsets: true,
   urlPrefixer: true,
   metaRobots: true,
   contentLength: true
 })
+
 app.use(unblocker)
 
-/* serverless export with binary support */
-module.exports.handler = serverless(app, {
+/* serverless export */
+module.exports.handler = serverless(app,{
   binary:[
     "image/*",
     "font/*",
