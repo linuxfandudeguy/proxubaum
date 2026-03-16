@@ -54,6 +54,49 @@ app.use((req,res,next)=>{
   next()
 })
 
+/* HTML comment injector */
+app.use((req,res,next)=>{
+  const chunks = []
+
+  const write = res.write
+  const end = res.end
+
+  res.write = function(chunk){
+    chunks.push(Buffer.from(chunk))
+  }
+
+  res.end = function(chunk){
+    if(chunk) chunks.push(Buffer.from(chunk))
+
+    const body = Buffer.concat(chunks)
+    const type = res.getHeader("content-type") || ""
+
+    if(type.includes("text/html")){
+      let html = body.toString("utf8")
+
+      html = html.split("\n").map(line=>{
+        if(line.includes(PREFIX)){
+          const hash = crypto
+            .createHash("sha1")
+            .update(line)
+            .digest("hex")
+            .slice(0,7)
+
+          return `${line}\n<!-- proxubaum:${hash} -->`
+        }
+        return line
+      }).join("\n")
+
+      res.setHeader("content-length", Buffer.byteLength(html))
+      return end.call(this, html)
+    }
+
+    return end.call(this, body)
+  }
+
+  next()
+})
+
 /* proxy */
 const unblocker = new Unblocker({
   prefix: PREFIX,
@@ -67,38 +110,6 @@ const unblocker = new Unblocker({
   urlPrefixer: true,
   metaRobots: true,
   contentLength: true
-})
-
-/* HTML tagging middleware */
-app.use((req,res,next)=>{
-  const send = res.send
-
-  res.send = function(body){
-    const type = res.getHeader("content-type") || ""
-
-    if(type.includes("text/html") && typeof body === "string"){
-      const lines = body.split("\n")
-
-      const processed = lines.map(line=>{
-        if(line.includes(PREFIX)){
-          const hash = crypto
-            .createHash("sha1")
-            .update(line)
-            .digest("hex")
-            .slice(0,7)
-
-          return `${line}\n<!-- proxubaum:${hash} -->`
-        }
-        return line
-      })
-
-      body = processed.join("\n")
-    }
-
-    return send.call(this, body)
-  }
-
-  next()
 })
 
 app.use(unblocker)
