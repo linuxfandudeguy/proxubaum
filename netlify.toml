@@ -1,8 +1,15 @@
 [build]
-  functions = "src"
+functions = "src"
+
+[functions]
+included_files = ["clientside/**"]
 
 [[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/index"
-  status = 200
-  force = true
+from = "/proxy/*"
+to = "/.netlify/functions/index"
+status = 200
+
+[[redirects]]
+from = "/go"
+to = "/.netlify/functions/index"
+status = 200
