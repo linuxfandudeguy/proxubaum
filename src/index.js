@@ -6,8 +6,16 @@ const path = require("path")
 const app = express()
 const PREFIX = "/proxy/"
 
-/* serve clientside folder */
-app.use(express.static(path.join(__dirname, "../clientside")))
+/* clientside directory */
+const clientDir = path.join(process.cwd(), "clientside")
+
+/* serve static files */
+app.use(express.static(clientDir))
+
+/* serve homepage */
+app.get("/", (req, res) => {
+  res.sendFile(path.join(clientDir, "index.html"))
+})
 
 function normalizeUrl(url){
   if(!url.startsWith("http")) url = "https://" + url
@@ -33,12 +41,9 @@ app.get("/go",(req,res)=>{
 
 /* decode /proxy/<encoded-url> */
 app.use(PREFIX,(req,res,next)=>{
-  const encoded = req.url.slice(1)
-
   try{
-    req.url = "/" + decodeURIComponent(encoded)
+    req.url = "/" + decodeURIComponent(req.url.slice(1))
   }catch{}
-
   next()
 })
 
