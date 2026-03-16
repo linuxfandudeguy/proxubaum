@@ -1,8 +1,6 @@
 [build]
+publish = "clientside"
 functions = "src"
-
-[functions]
-included_files = ["clientside/**"]
 
 [[redirects]]
 from = "/proxy/*"
