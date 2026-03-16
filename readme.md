@@ -5,6 +5,8 @@
 a very bad proxy powered by `unblocker`, the same code used for the original (now deceased) **nodeunblocker.com**.
 it works. sometimes. probably.
 
+> ** for the kiddies** : use this to play games when you should be studying ig
+
 if a site explodes, renders like a corrupted geocities page, or refuses to load entirely — that is considered **expected behavior**.
 
 ---
