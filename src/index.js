@@ -2,6 +2,7 @@ const express = require("express")
 const Unblocker = require("unblocker")
 const serverless = require("serverless-http")
 const path = require("path")
+const crypto = require("crypto")
 
 const app = express()
 const PREFIX = "/proxy/"
@@ -66,6 +67,38 @@ const unblocker = new Unblocker({
   urlPrefixer: true,
   metaRobots: true,
   contentLength: true
+})
+
+/* HTML tagging middleware */
+app.use((req,res,next)=>{
+  const send = res.send
+
+  res.send = function(body){
+    const type = res.getHeader("content-type") || ""
+
+    if(type.includes("text/html") && typeof body === "string"){
+      const lines = body.split("\n")
+
+      const processed = lines.map(line=>{
+        if(line.includes(PREFIX)){
+          const hash = crypto
+            .createHash("sha1")
+            .update(line)
+            .digest("hex")
+            .slice(0,7)
+
+          return `${line}\n<!-- proxubaum:${hash} -->`
+        }
+        return line
+      })
+
+      body = processed.join("\n")
+    }
+
+    return send.call(this, body)
+  }
+
+  next()
 })
 
 app.use(unblocker)
