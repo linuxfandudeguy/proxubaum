@@ -58,8 +58,8 @@ if you are cloning the repo **just use bun**.
 bun install
 ```
 
-yes `npm` will probably work.
-no i will not test it.
+yes `npm` will work
+yes i tested it.
 
 ---
 
