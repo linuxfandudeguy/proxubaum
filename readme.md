@@ -69,7 +69,7 @@ if running locally:
 
 
 ```
-node src/index.js
+node src/index.local.js
 ```
 *
 once running, open:
@@ -84,7 +84,6 @@ and witness the magic.
 
 ## serverless deployment (important)
 
-lmao you will need to fix this if running locally lol
 ------------
 
 the `src/index.js` file is wrapped with `serverless-http`.
@@ -103,21 +102,14 @@ so platforms like:
 
 can run the proxy as a **serverless function instead of a normal server**.
 
-because of this, your routing may look like:
+you will need to run
 
 ```
-/.netlify/functions/index/proxy/https://example.com
+node index.local.js
 ```
+instead.
 
-or with redirects configured:
 
-```
-/proxy/https://example.com
-```
-
-depending on how your hosting platform rewrites paths.
-
----
 
 ## why do some sites break?
 
