@@ -5,9 +5,18 @@
 a very bad proxy powered by `unblocker`, the same code used for the original (now deceased) **nodeunblocker.com**.
 it works. sometimes. probably.
 
+unlike proxies like Ultraviolet or Holy Unblocker, this proxy is serverless. 
+
+this means it **CAN** be hosted on Netlify, Vercel or almost any platform as long as it supports serverless functions
+
+
 > for the kiddies: use this to play games when you should be studying ig
 
 if a site explodes, renders like a corrupted geocities page, or refuses to load entirely — that is considered **expected behavior**.
+
+# official proxubaum urls made by linuxfandudeguy
+https://proxubaum.netlify.app/
+https://proxubaum-koshlandj.us3.pitunnel.net/ (not updated as much, also this url is not static or atleast i think it is not)
 
 ---
 
