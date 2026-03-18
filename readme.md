@@ -15,8 +15,8 @@ this means it **CAN** be hosted on Netlify, Vercel or almost any platform as lon
 if a site explodes, renders like a corrupted geocities page, or refuses to load entirely — that is considered **expected behavior**.
 
 # official proxubaum urls made by linuxfandudeguy
-https://proxubaum.netlify.app/
-https://proxubaum-koshlandj.us3.pitunnel.net/ (not updated as much, also this url is not static or atleast i think it is not)
+- https://proxubaum.netlify.app/ (updated instantly)
+- https://proxubaum-koshlandj.us3.pitunnel.net/ (updated frequently, also this url is not static or atleast i think it is not)
 
 ---
 
