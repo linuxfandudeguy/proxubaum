@@ -107,7 +107,7 @@ module.exports = serverless(app)
 you will need to run
 
 ```
-node index.local.js
+node src/index.local.js
 ```
 instead if running locally.
 
