@@ -103,20 +103,13 @@ this means the express app is exported like this:
 module.exports = serverless(app)
 ```
 
-so platforms like:
-
-* Netlify
-* Vercel
-* other serverless environments
-
-can run the proxy as a **serverless function instead of a normal server**.
 
 you will need to run
 
 ```
 node index.local.js
 ```
-instead.
+instead if running locally.
 
 
 
@@ -170,6 +163,6 @@ idk probably MIT or something reasonable.
 
 ## final note
 
-this proxy is not fast, not secure, and not guaranteed to work.
+this proxy is not fast and not guaranteed to work.
 
 but it **does proxy things**, which is technically the goal.
