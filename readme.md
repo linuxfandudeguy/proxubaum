@@ -1,6 +1,6 @@
 # proxubaum
 
-> o proxubaum o proxubaum, how thy proxy is so verdant
+> o proxubaum o proxubaum, how steadfast is your unblocker
 
 a very bad proxy powered by `unblocker`, the same code used for the original (now deceased) **nodeunblocker.com**.
 it works. sometimes. probably.
