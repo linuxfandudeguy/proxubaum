@@ -77,7 +77,7 @@ if running locally:
 
 
 ```
-node src/index.local.js
+node src/index-local.js
 ```
 *
 once running, open:
@@ -106,7 +106,7 @@ module.exports = serverless(app)
 you will need to run
 
 ```
-node src/index.local.js
+node src/index-local.js
 ```
 instead if running locally.
 
