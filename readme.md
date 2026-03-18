@@ -1,13 +1,21 @@
 # proxubaum
 
-> o proxubaum o proxubaum, how thy proxy is so verdant
+> o proxubaum o proxubaum, how steadfast is your unblocker
 
 a very bad proxy powered by `unblocker`, the same code used for the original (now deceased) **nodeunblocker.com**.
 it works. sometimes. probably.
 
+unlike proxies like Ultraviolet or Holy Unblocker, this proxy is serverless. 
+
+this means it **CAN** be hosted on Netlify, Vercel or almost any platform as long as it supports serverless functions
+
+
 > for the kiddies: use this to play games when you should be studying ig
 
 if a site explodes, renders like a corrupted geocities page, or refuses to load entirely — that is considered **expected behavior**.
+
+# official proxubaum urls made by linuxfandudeguy
+- https://proxubaum.netlify.app/ (updated instantly)
 
 ---
 
@@ -58,8 +66,8 @@ if you are cloning the repo **just use bun**.
 bun install
 ```
 
-yes `npm` will probably work.
-no i will not test it.
+yes `npm` will work
+yes i tested it.
 
 ---
 
@@ -94,20 +102,13 @@ this means the express app is exported like this:
 module.exports = serverless(app)
 ```
 
-so platforms like:
-
-* Netlify
-* Vercel
-* other serverless environments
-
-can run the proxy as a **serverless function instead of a normal server**.
 
 you will need to run
 
 ```
-node index.local.js
+node src/index.local.js
 ```
-instead.
+instead if running locally.
 
 
 
@@ -161,6 +162,6 @@ idk probably MIT or something reasonable.
 
 ## final note
 
-this proxy is not fast, not secure, and not guaranteed to work.
+this proxy is not fast and not guaranteed to work.
 
 but it **does proxy things**, which is technically the goal.
