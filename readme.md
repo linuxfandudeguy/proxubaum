@@ -16,7 +16,6 @@ if a site explodes, renders like a corrupted geocities page, or refuses to load 
 
 # official proxubaum urls made by linuxfandudeguy
 - https://proxubaum.netlify.app/ (updated instantly)
-- https://proxubaum-koshlandj.us3.pitunnel.net/ (updated frequently, also this url is not static or atleast i think it is not)
 
 ---
 
